@@ -12,7 +12,23 @@ let
         system.stateVersion = config.system.nixos.release;
         virtualisation.vmVariant.virtualisation = {
           graphics = false;
+          forwardPorts = [
+            {
+              from = "host";
+              host.port = 2222;
+              guest.port = 22;
+            }
+          ];
         };
+        services.openssh = {
+          enable = true;
+          settings = {
+            PermitRootLogin = "yes";
+            PermitEmptyPasswords = "yes";
+          };
+        };
+        users.users.root.password = "";
+        security.pam.services.sshd.allowNullPassword = true;
       })
     ];
   };
