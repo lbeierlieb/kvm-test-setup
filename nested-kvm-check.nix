@@ -49,6 +49,30 @@ runNixOSTest {
   };
 
   testScript = ''
+    import datetime
+
+    def nested_guest_execute(command):
+       return machine.execute( "ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p 2222 '" + command + "'")
+
+    def nested_guest_succeed(command):
+       return machine.succeed( "ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p 2222 '" + command + "'", timeout=datetime.timedelta(seconds = 30))
+
+    def wait_for_nested_guest(timeout_sec):
+      start_time = datetime.datetime.now()
+      print("Waiting for nested SSH port to become available")
+      while True:
+        (status, out) = machine.execute( "ssh -q -o ConnectTimeout=1 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost -p 2222 'echo hi'")
+        if status == 0:
+          return
+        if (datetime.datetime.now() - start_time).total_seconds() > timeout_sec:
+          raise Exception(f"timeout: nested-SSH port did not open after {timeout_sec} seconds")
+
     machine.wait_for_unit("nested-guest.service")
+    wait_for_nested_guest(60)
+    (status, out) = nested_guest_execute("uname -a")
+    print(out)
+    nested_guest_succeed("uname -a | grep 6.18.54")
+    nested_guest_succeed("whoami | grep root")
+    nested_guest_succeed("uname -a | grep 6.18.53")
   '';
 }
