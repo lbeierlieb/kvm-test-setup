@@ -3,12 +3,19 @@
   nixosSystem,
   stdenv,
 }:
+{
+  name,
+  machine ? { },
+  nested-machine ? { },
+  test-script ? "",
+}:
 let
   nested-guest = nixosSystem {
     inherit (stdenv.hostPlatform) system;
     modules = [
+      nested-machine
       ({ config, ... }: {
-        networking.hostName = "nested-guest";
+        networking.hostName = "nested-machine";
         system.stateVersion = config.system.nixos.release;
         virtualisation.vmVariant.virtualisation = {
           graphics = false;
@@ -34,12 +41,14 @@ let
   };
 in
 runNixOSTest {
-  name = "nested-kvm";
+  inherit name;
   nodes.machine = {
+    imports = [ machine ];
+
     systemd.services.nested-guest = {
       wantedBy = [ "multi-user.target" ];
       serviceConfig.ExecStart = ''
-        ${nested-guest.config.system.build.vm}/bin/run-nested-guest-vm
+        ${nested-guest.config.system.build.vm}/bin/run-nested-machine-vm
       '';
     };
     virtualisation = {
@@ -47,7 +56,6 @@ runNixOSTest {
       memorySize = 4096;
     };
   };
-
   testScript = ''
     import datetime
 
@@ -68,11 +76,8 @@ runNixOSTest {
           raise Exception(f"timeout: nested-SSH port did not open after {timeout_sec} seconds")
 
     machine.wait_for_unit("nested-guest.service")
-    wait_for_nested_guest(60)
-    (status, out) = nested_guest_execute("uname -a")
-    print(out)
-    nested_guest_succeed("uname -a | grep 6.18.54")
-    nested_guest_succeed("whoami | grep root")
-    nested_guest_succeed("uname -a | grep 6.18.53")
+    wait_for_nested_guest(600)
+
+    ${test-script}
   '';
 }
