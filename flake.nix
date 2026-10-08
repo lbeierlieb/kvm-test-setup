@@ -32,7 +32,7 @@
           inherit (pkgs.stdenv.hostPlatform) system;
         in
         {
-          nested-kvm = pkgs.callPackage ./nested-kvm-check.nix {
+          smoke-test = pkgs.callPackage ./smoke-test.nix {
             nested-nixos-test = self.packages.${system}.nested-nixos-test;
           };
         }

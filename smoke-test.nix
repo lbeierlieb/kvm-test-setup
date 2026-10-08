@@ -2,7 +2,7 @@
   nested-nixos-test,
 }:
 nested-nixos-test {
-  name = "nested-kvm";
+  name = "nested-nixos-test smoke-test";
   test-script = ''
     (status, out) = nested_guest_execute("uname -a")
     print(out)
