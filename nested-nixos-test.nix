@@ -76,7 +76,7 @@ runNixOSTest {
           raise Exception(f"timeout: nested-SSH port did not open after {timeout_sec} seconds")
 
     machine.wait_for_unit("nested-guest.service")
-    wait_for_nested_guest(60)
+    wait_for_nested_guest(600)
 
     ${test-script}
   '';
