@@ -21,6 +21,10 @@
         linux-vmi = pkgs.callPackage ./custom-kernel.nix {
           linux = pkgs.linuxKernel.kernels.linux_7_2;
         };
+        nested-nixos-test = pkgs.callPackage ./nested-nixos-test.nix {
+          inherit (pkgs.testers) runNixOSTest;
+          inherit (nixpkgs.lib) nixosSystem;
+        };
       });
       checks = forAllSystems (pkgs: {
         nested-kvm = pkgs.callPackage ./nested-kvm-check.nix {
