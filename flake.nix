@@ -1,5 +1,5 @@
 {
-  description = "Example how to test KVM inside a NixOS integration test";
+  description = "nested-nixos-test: A helper function to build nested nixos integration tests";
 
   inputs = {
     nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst";
