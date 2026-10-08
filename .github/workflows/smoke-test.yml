@@ -1,0 +1,17 @@
+name: nested-nixos-test smoke test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - name: smoke-test
+        run: nix build .#checks.x86_64-linux.smoke-test --print-build-logs
