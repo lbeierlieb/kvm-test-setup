@@ -26,11 +26,16 @@
           inherit (nixpkgs.lib) nixosSystem;
         };
       });
-      checks = forAllSystems (pkgs: {
-        nested-kvm = pkgs.callPackage ./nested-kvm-check.nix {
-          inherit (pkgs.testers) runNixOSTest;
-          inherit (nixpkgs.lib) nixosSystem;
-        };
-      });
+      checks = forAllSystems (
+        pkgs:
+        let
+          inherit (pkgs.stdenv.hostPlatform) system;
+        in
+        {
+          nested-kvm = pkgs.callPackage ./nested-kvm-check.nix {
+            nested-nixos-test = self.packages.${system}.nested-nixos-test;
+          };
+        }
+      );
     };
 }
